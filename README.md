@@ -7,7 +7,7 @@ Open CASCADE Technology - Draw Harness
 
 This is an experimental work-in-progress repository for a live DEMO of Draw Harness started within the browser.
 The DEMO itself could be found here:<br>
-https://gkv311.github.io/occt-draw/
+https://gkv311.github.io/occt-demo-draw/
 
 The project implements a minimalistic web-page opening Draw Harness application from [Open CASCADE Technology](https://dev.opencascade.org) (or OCCT)
 without installation in the system and executed directly by the browser.
@@ -73,6 +73,3 @@ dealing with the following engineering and mechanical domains:
 3D modeling (CAD), manufacturing (CAM), numerical simulation (CAE), measurement equipment (CMM) and quality control (CAQ).
 Since its publication in 1999 as an open source CAD software kernel,
 OCCT has been successfully used in numerous projects ranging from building and construction to aerospace and automotive.
-
-Please visit official site for more information:<br/>
-https://dev.opencascade.org
