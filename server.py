@@ -7,6 +7,11 @@
 import sys
 import os
 
+# for `--open "PAGE"`
+import time
+import threading
+import webbrowser
+
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 # Subclass to protect from starting multiple servers on the same port on Windows.
@@ -94,6 +99,8 @@ class WasmHttpRequestHandler (SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
   hasPortArg: bool = False
+  toOpenPage: bool = False
+  anOpenPage: str = ""
   aNbArgs: int = len(sys.argv)
   anArgIter: int = 1
   while anArgIter < aNbArgs:
@@ -119,6 +126,10 @@ if __name__ == '__main__':
         anArgIter += 1
         isOn: int = int(sys.argv[anArgIter])
         hasThreadedServer = isOn != 0
+      elif (anArg.lower() == "--open") or (anArg.lower() == "-open"):
+        anArgIter += 1
+        anOpenPage = sys.argv[anArgIter]
+        toOpenPage = True
       elif (anArg.lower() == "--maxage") or (anArg.lower() == "-maxage"):
         anArgIter += 1
         THE_HEADERS_MAX_AGE = int(sys.argv[anArgIter])
@@ -136,7 +147,7 @@ if __name__ == '__main__':
     if (anArg.lower() == "--help") or (anArg.lower() == "-help"):
       print ("Usage: server.py [--address ADDRESS]=localhost [--port PORT]=8000\n\
                  [--cors 0|1]=1 [--threaded 0|1]=1 [--directory DIR]=CWD\n\
-                 [--maxage SECONDS]=2 [--checklastmodified 0|1]=1")
+                 [--open page] [--maxage SECONDS]=2 [--checklastmodified 0|1]=1")
       sys.exit (0)
     elif not hasPortArg:
       hasPortArg = True
@@ -152,7 +163,12 @@ if __name__ == '__main__':
   else:
     anHttpServer = WasmHTTPServer ((THE_ADDRESS, THE_PORT), WasmHttpRequestHandler)
 
-  print ("Serving  http://{0}:{1}/  [CORS:{2} THREADS:{3} MAXAGE:{4}]"
-         .format (anHttpServer.server_address[0], anHttpServer.server_address[1], THE_HEADERS_CORS, hasThreadedServer, THE_HEADERS_MAX_AGE))
+  aServerUrl = "http://{0}:{1}/".format (anHttpServer.server_address[0], anHttpServer.server_address[1])
+  print ("Serving  {0}  [CORS:{1} THREADS:{2} MAXAGE:{3}]"
+         .format (aServerUrl, THE_HEADERS_CORS, hasThreadedServer, THE_HEADERS_MAX_AGE))
+
+  if toOpenPage:
+    time.sleep(1)
+    webbrowser.open_new("{0}{1}".format (aServerUrl, anOpenPage))
 
   anHttpServer.serve_forever()
