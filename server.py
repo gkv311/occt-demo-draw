@@ -9,9 +9,20 @@ import os
 
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
+# Subclass to protect from starting multiple servers on the same port on Windows.
+class WasmHTTPServer (HTTPServer):
+  def __init__(self, server_address, RequestHandlerClass):
+    self.allow_reuse_address = False
+    super().__init__(server_address, RequestHandlerClass)
+
+# ThreadingHTTPServer introduced by Python 3.7
 hasThreadedServer: bool = sys.version_info.major >= 4 or sys.version_info.minor >= 7
 if hasThreadedServer:
   from http.server import ThreadingHTTPServer
+  class WasmThreadingHTTPServer (ThreadingHTTPServer):
+    def __init__(self, server_address, RequestHandlerClass):
+      self.allow_reuse_address = False
+      super().__init__(server_address, RequestHandlerClass)
 
 THE_ADDRESS: str = "localhost"
 THE_PORT: int = 8000
@@ -20,7 +31,7 @@ THE_HEADERS_MAX_AGE: int = 2
 THE_CHECK_LAST_MODIFIED: bool = True
 THE_ROOT_FOLDER: str = os.getcwd()
 
-class CustomHttpRequestHandler (SimpleHTTPRequestHandler):
+class WasmHttpRequestHandler (SimpleHTTPRequestHandler):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, directory=THE_ROOT_FOLDER, **kwargs)
 
@@ -137,9 +148,9 @@ if __name__ == '__main__':
     anArgIter += 1
 
   if hasThreadedServer:
-    anHttpServer = ThreadingHTTPServer ((THE_ADDRESS, THE_PORT), CustomHttpRequestHandler)
+    anHttpServer = WasmThreadingHTTPServer ((THE_ADDRESS, THE_PORT), WasmHttpRequestHandler)
   else:
-    anHttpServer = HTTPServer ((THE_ADDRESS, THE_PORT), CustomHttpRequestHandler)
+    anHttpServer = WasmHTTPServer ((THE_ADDRESS, THE_PORT), WasmHttpRequestHandler)
 
   print ("Serving  http://{0}:{1}/  [CORS:{2} THREADS:{3} MAXAGE:{4}]"
          .format (anHttpServer.server_address[0], anHttpServer.server_address[1], THE_HEADERS_CORS, hasThreadedServer, THE_HEADERS_MAX_AGE))
